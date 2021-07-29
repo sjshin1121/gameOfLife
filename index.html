@@ -6,9 +6,13 @@
 	<script src="test/bundle.js"></script>
 </head>
 <body>
+<button id="b1">start</button>
 <canvas id="c1"></canvas>
 <script>
-	gameOfLife.start(document.getElementById('c1'))
+	const w = gameOfLife.init(document.getElementById('c1'))
+	document.querySelector('#b1').addEventListener('click', () => {
+		w.timerStart(500);
+	})
 </script>
 </body>
 </html>

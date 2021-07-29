@@ -10,6 +10,42 @@
 
     var assert__default = /*#__PURE__*/_interopDefaultLegacy(assert);
 
+    var DUMMY = new /** @class */ (function () {
+        function Dummy() {
+        }
+        Dummy.prototype.clear = function () {
+        };
+        Dummy.prototype.create = function () {
+            return undefined;
+        };
+        Dummy.prototype.edge = function (row, column) {
+            return this;
+        };
+        Dummy.prototype.nextState = function (north, south, east, west, northeast, northwest, southeast, southwest) {
+            return false;
+        };
+        Dummy.prototype.isAlive = function () {
+            return false;
+        };
+        Dummy.prototype.isDisruptiveTo = function () {
+            return undefined;
+        };
+        Dummy.prototype.redraw = function () {
+        };
+        Dummy.prototype.transfer = function (memento) {
+            return false;
+        };
+        Dummy.prototype.transition = function () {
+            return false;
+        };
+        Dummy.prototype.userClicked = function () {
+        };
+        Dummy.prototype.widthInCells = function () {
+            return 0;
+        };
+        return Dummy;
+    }());
+
     var Neighborhood = /** @class */ (function () {
         function Neighborhood(gridSize, prototype) {
             this.amActive = false;
@@ -20,10 +56,9 @@
             var column = 0;
             for (; row < gridSize; row++) {
                 var rowArr = [];
-                for (; column < gridSize; column++) {
+                for (column = 0; column < gridSize; column++) {
                     rowArr.push(prototype.create());
                 }
-                column = 0;
                 this.grid.push(rowArr);
             }
         }
@@ -35,8 +70,61 @@
         Neighborhood.prototype.edge = function (row, column) {
             return this.grid[row][column];
         };
-        Neighborhood.prototype.figureNestState = function (north, south, east, west, northeast, northwest, southeast, southwest) {
-            return false;
+        Neighborhood.prototype.nextState = function (north, south, east, west, northeast, northwest, southeast, southwest) {
+            var gridSize = this.gridSize;
+            var northCell, southCell, eastCell, westCell, northeastCell, northwestCell, southeastCell, southwestCell;
+            var row = 0;
+            var column = 0;
+            for (; row < gridSize; row++) {
+                for (column = 0; column < gridSize; column++) {
+                    if (row === 0) {
+                        northwestCell = column === 0 ?
+                            northwest.edge(gridSize - 1, gridSize - 1) :
+                            north.edge(gridSize - 1, column - 1);
+                        northCell = north.edge(gridSize - 1, column);
+                        northeastCell = column === (gridSize - 1) ?
+                            northeast.edge(gridSize - 1, 0) :
+                            north.edge(gridSize - 1, column + 1);
+                    }
+                    else {
+                        northwestCell = column === 0 ?
+                            west.edge(row - 1, gridSize - 1) :
+                            this.grid[row - 1][column - 1];
+                        northCell = this.grid[row - 1][column];
+                        northeastCell = column === (gridSize - 1) ?
+                            east.edge(row - 1, 0) :
+                            this.grid[row - 1][column + 1];
+                    }
+                    westCell = column === 0 ?
+                        west.edge(row, gridSize - 1) :
+                        this.grid[row][column - 1];
+                    eastCell = column === (gridSize - 1) ?
+                        east.edge(row, 0) :
+                        this.grid[row][column + 1];
+                    if (row === (gridSize - 1)) {
+                        southwestCell = column === 0 ?
+                            southwest.edge(0, gridSize - 1) :
+                            south.edge(0, column - 1);
+                        southCell = south.edge(0, column);
+                        southeastCell = column === (gridSize - 1) ?
+                            southeast.edge(0, 0) :
+                            south.edge(0, column + 1);
+                    }
+                    else {
+                        southwestCell = column === 0 ?
+                            west.edge(row + 1, gridSize - 1) :
+                            this.grid[row + 1][column - 1];
+                        southCell = this.grid[row + 1][column];
+                        southeastCell = column === (gridSize - 1) ?
+                            east.edge(row + 1, 0) :
+                            this.grid[row + 1][column + 1];
+                    }
+                    if (this.grid[row][column].nextState(northCell, southCell, eastCell, westCell, northeastCell, northwestCell, southeastCell, southwestCell)) {
+                        this.amActive = true;
+                    }
+                }
+            }
+            return this.amActive;
         };
         Neighborhood.prototype.isAlive = function () {
             return false;
@@ -56,18 +144,27 @@
             renderer.addRect('stroke', x * width, y * width, width, width, this.amActive ? 'red' : 'black');
         };
         Neighborhood.prototype.transition = function () {
-            return false;
+            var row = 0;
+            var column = 0;
+            var result = false;
+            for (; row < this.gridSize; row++) {
+                for (column = 0; column < this.gridSize; column++) {
+                    if (this.grid[row][column].transition()) {
+                        result = true;
+                    }
+                }
+            }
+            return result;
         };
         Neighborhood.prototype.userClicked = function (x, y) {
             var row = 0;
             var column = 0;
             var isActive = false;
             for (; row < this.gridSize; row++) {
-                for (; column < this.gridSize; column++) {
+                for (column = 0; column < this.gridSize; column++) {
                     this.grid[row][column].userClicked(x, y);
                     isActive = isActive || this.grid[row][column].isAlive();
                 }
-                column = 0;
             }
             this.amActive = isActive;
         };
@@ -86,7 +183,7 @@
         Resident.prototype.isStable = function () {
             return this.amAlive === this.willBeAlive;
         };
-        Resident.prototype.figureNestState = function (north, south, east, west, northeast, northwest, southeast, southwest) {
+        Resident.prototype.nextState = function (north, south, east, west, northeast, northwest, southeast, southwest) {
             var neighbors = 0;
             if (north.isAlive())
                 ++neighbors;
@@ -158,6 +255,15 @@
         World.prototype.draw = function () {
             this.outermostCell.redraw(this.renderer, 0, 0);
             this.renderer.render();
+        };
+        World.prototype.timerStart = function (time) {
+            var _this = this;
+            console.log('timerStart', time);
+            window.setInterval(function () {
+                _this.outermostCell.nextState(DUMMY, DUMMY, DUMMY, DUMMY, DUMMY, DUMMY, DUMMY, DUMMY);
+                _this.outermostCell.transition();
+                _this.draw();
+            }, time);
         };
         return World;
     }());
@@ -239,12 +345,13 @@
         return Renderer;
     }());
 
-    function start(el) {
+    function init(el) {
         var w = new World(new Renderer(el));
         w.draw();
+        return w;
     }
 
-    exports.start = start;
+    exports.init = init;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 

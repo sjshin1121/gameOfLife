@@ -11,7 +11,7 @@ export class Resident implements Cell{
 	private isStable(): boolean {
 		return this.amAlive === this.willBeAlive;
 	}
-	figureNestState(north: Cell, south, east, west, northeast, northwest, southeast, southwest): boolean {
+	nextState(north: Cell, south, east, west, northeast, northwest, southeast, southwest): boolean {
 		let neighbors = 0;
 		if (north.isAlive()) ++neighbors;
 		if (south.isAlive()) ++neighbors;

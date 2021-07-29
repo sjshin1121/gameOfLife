@@ -7,7 +7,7 @@ interface Memento {
 }
 
 export interface Cell {
-	figureNestState(north: Cell, south, east, west, northeast, northwest, southeast, southwest): boolean
+	nextState(north: Cell, south, east, west, northeast, northwest, southeast, southwest): boolean
 	edge(row: number, column: number): Cell
 	transition(): boolean
 	redraw(renderer, x, y): void
@@ -18,7 +18,7 @@ export interface Cell {
 	clear(): void
 }
 
-export const DUMMY = new class implements Cell {
+export const DUMMY = new class Dummy implements Cell {
 	clear(): void {
 	}
 
@@ -27,10 +27,10 @@ export const DUMMY = new class implements Cell {
 	}
 
 	edge(row: number, column: number): Cell {
-		return undefined;
+		return this;
 	}
 
-	figureNestState(north: Cell, south, east, west, northeast, northwest, southeast, southwest): boolean {
+	nextState(north: Cell, south, east, west, northeast, northwest, southeast, southwest): boolean {
 		return false;
 	}
 

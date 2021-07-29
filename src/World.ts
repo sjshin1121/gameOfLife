@@ -1,4 +1,4 @@
-import {Cell} from "./Cell";
+import {Cell, DUMMY} from "./Cell";
 import {Neighborhood} from "./Neighborhood";
 import {Renderer} from "./Renderer";
 import {Resident} from "./Resident";
@@ -28,5 +28,14 @@ export class World {
 	draw() {
 		this.outermostCell.redraw(this.renderer, 0, 0);
 		this.renderer.render()
+	}
+
+	timerStart(time) {
+		console.log('timerStart', time);
+		window.setInterval(() => {
+			this.outermostCell.nextState(DUMMY, DUMMY, DUMMY, DUMMY, DUMMY, DUMMY, DUMMY, DUMMY);
+			this.outermostCell.transition();
+			this.draw();
+		}, time);
 	}
 }
