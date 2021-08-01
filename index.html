@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Title</title>
-	<script src="test/bundle.js"></script>
+	<script src="dist/bundle.js"></script>
 </head>
 <body>
 <button id="b1">start</button>
@@ -11,7 +11,7 @@
 <script>
 	const w = gameOfLife.init(document.getElementById('c1'))
 	document.querySelector('#b1').addEventListener('click', () => {
-		w.timerStart(500);
+		w.timerStart(200);
 	})
 </script>
 </body>

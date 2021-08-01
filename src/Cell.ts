@@ -1,16 +1,8 @@
-import * as assert from 'assert';
-
-interface Direction {
-}
-
-interface Memento {
-}
-
 export interface Cell {
-	nextState(north: Cell, south, east, west, northeast, northwest, southeast, southwest): boolean
+	nextGeneration(north: Cell, south: Cell, east: Cell, west: Cell, northeast: Cell, northwest: Cell, southeast: Cell, southwest: Cell): boolean
 	edge(row: number, column: number): Cell
 	transition(): boolean
-	redraw(renderer, x, y): void
+	draw(renderer, x, y): void
 	userClicked(x, y): void
 	isAlive(): boolean
 	widthInCells(): number
@@ -30,7 +22,7 @@ export const DUMMY = new class Dummy implements Cell {
 		return this;
 	}
 
-	nextState(north: Cell, south, east, west, northeast, northwest, southeast, southwest): boolean {
+	nextGeneration(north: Cell, south, east, west, northeast, northwest, southeast, southwest): boolean {
 		return false;
 	}
 
@@ -38,15 +30,7 @@ export const DUMMY = new class Dummy implements Cell {
 		return false;
 	}
 
-	isDisruptiveTo(): Direction {
-		return undefined;
-	}
-
-	redraw(): void {
-	}
-
-	transfer(memento: Memento): boolean {
-		return false;
+	draw(): void {
 	}
 
 	transition(): boolean {

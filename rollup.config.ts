@@ -8,7 +8,7 @@ import livereload from 'rollup-plugin-livereload'
 export default {
 	input: 'src/main.ts',
 	output: {
-		file: 'test/bundle.js',
+		file: 'dist/bundle.js',
 		format: 'umd',
 		name: 'gameOfLife'
 	},

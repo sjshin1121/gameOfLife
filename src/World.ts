@@ -26,14 +26,14 @@ export class World {
 	}
 	
 	draw() {
-		this.outermostCell.redraw(this.renderer, 0, 0);
+		this.outermostCell.draw(this.renderer, 0, 0);
 		this.renderer.render()
 	}
 
 	timerStart(time) {
 		console.log('timerStart', time);
 		window.setInterval(() => {
-			this.outermostCell.nextState(DUMMY, DUMMY, DUMMY, DUMMY, DUMMY, DUMMY, DUMMY, DUMMY);
+			this.outermostCell.nextGeneration(DUMMY, DUMMY, DUMMY, DUMMY, DUMMY, DUMMY, DUMMY, DUMMY);
 			this.outermostCell.transition();
 			this.draw();
 		}, time);

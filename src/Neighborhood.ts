@@ -1,13 +1,13 @@
 import {Cell} from "./Cell";
+import {Renderer} from "./Renderer";
 
 export class Neighborhood implements Cell {
 	private amActive: boolean = false;
 	private readonly gridSize: number;
-	private readonly grid: Cell[][];
-	private oneLastRefreshRequired: boolean = false;
+	private readonly children: Cell[][];
 	constructor(gridSize: number, prototype: Cell) {
 		this.gridSize = gridSize;
-		this.grid = [];
+		this.children = [];
 		let row = 0;
 		let column = 0;
 		for(; row < gridSize; row++) {
@@ -15,7 +15,7 @@ export class Neighborhood implements Cell {
 			for(column = 0; column < gridSize; column++) {
 				rowArr.push(prototype.create());
 			}
-			this.grid.push(rowArr)
+			this.children.push(rowArr)
 		}
 	}
 
@@ -23,14 +23,14 @@ export class Neighborhood implements Cell {
 	}
 
 	create(): Cell {
-		return new Neighborhood(this.gridSize, this.grid[0][0]);
+		return new Neighborhood(this.gridSize, this.children[0][0]);
 	}
 
 	edge(row: number, column: number): Cell {
-		return this.grid[row][column];
+		return this.children[row][column];
 	}
 
-	nextState(north: Cell, south: Cell, east: Cell, west: Cell, northeast: Cell, northwest: Cell, southeast: Cell, southwest: Cell): boolean {
+	nextGeneration(north: Cell, south: Cell, east: Cell, west: Cell, northeast: Cell, northwest: Cell, southeast: Cell, southwest: Cell): boolean {
 		const gridSize = this.gridSize;
 		let northCell, southCell, eastCell, westCell, northeastCell, northwestCell, southeastCell, southwestCell;
 		let row = 0;
@@ -50,21 +50,21 @@ export class Neighborhood implements Cell {
 				} else {
 					northwestCell = column === 0 ?
 						west.edge(row - 1, gridSize - 1) :
-						this.grid[row - 1][column - 1];
+						this.children[row - 1][column - 1];
 
-					northCell = this.grid[row - 1][column];
+					northCell = this.children[row - 1][column];
 
 					northeastCell = column === (gridSize - 1) ?
 						east.edge(row - 1, 0) :
-						this.grid[row - 1][column + 1];
+						this.children[row - 1][column + 1];
 				}
 
 				westCell = column === 0 ?
 					west.edge(row, gridSize - 1) :
-					this.grid[row][column - 1];
+					this.children[row][column - 1];
 				eastCell = column === (gridSize - 1) ?
 					east.edge(row, 0) :
-					this.grid[row][column + 1];
+					this.children[row][column + 1];
 
 				if (row === (gridSize - 1)) {
 					southwestCell = column === 0 ?
@@ -79,16 +79,16 @@ export class Neighborhood implements Cell {
 				} else {
 					southwestCell = column === 0 ?
 						west.edge(row + 1, gridSize - 1) :
-						this.grid[row + 1][column - 1];
+						this.children[row + 1][column - 1];
 
-					southCell = this.grid[row + 1][column];
+					southCell = this.children[row + 1][column];
 
 					southeastCell = column === (gridSize - 1) ?
 						east.edge(row + 1, 0) :
-						this.grid[row + 1][column + 1];
+						this.children[row + 1][column + 1];
 				}
 
-				if (this.grid[row][column].nextState(
+				if (this.children[row][column].nextGeneration(
 					northCell, southCell,
 					eastCell, westCell,
 					northeastCell, northwestCell,
@@ -102,46 +102,46 @@ export class Neighborhood implements Cell {
 	}
 
 	isAlive(): boolean {
-		return false;
+		return this.amActive;
 	}
 
-	redraw(renderer, x, y): void {
+	draw(renderer: Renderer, x: number, y: number): void {
 		let width = 0;
 		let row = 0;
 		let column = 0;
 		for(; row < this.gridSize; row++) {
-			for(; column < this.gridSize; column++) {
-				this.grid[row][column].redraw(renderer, row + (x * this.gridSize), column + (y * this.gridSize));
-				width += this.grid[row][column].widthInCells();
+			for(column = 0; column < this.gridSize; column++) {
+				this.children[row][column].draw(renderer, row + (x * this.gridSize), column + (y * this.gridSize));
+				width += this.children[row][column].widthInCells();
 			}
-			column = 0;
 		}
 		width /= this.gridSize;
 		renderer.addRect('stroke', x * width, y * width, width, width, this.amActive ? 'red' : 'black');
 	}
 
 	transition(): boolean {
-		let row = 0;
-		let column = 0;
 		let result = false;
-		for(; row < this.gridSize; row++) {
-			for(column = 0; column < this.gridSize; column++) {
-				if (this.grid[row][column].transition()) {
+		let isAlive = false;
+		for (const childrenRow of this.children) {
+			for (const child of childrenRow) {
+				if (child.transition()) {
 					result = true;
+				}
+				if (child.isAlive()) {
+					isAlive = true;
 				}
 			}
 		}
+		this.amActive = isAlive;
 		return result;
 	}
 
 	userClicked(x, y): void {
-		let row = 0;
-		let column = 0;
 		let isActive = false;
-		for(; row < this.gridSize; row++) {
-			for(column = 0; column < this.gridSize; column++) {
-				this.grid[row][column].userClicked(x, y);
-				isActive = isActive || this.grid[row][column].isAlive();
+		for (const childrenRow of this.children) {
+			for (const child of childrenRow) {
+				child.userClicked(x, y);
+				isActive = isActive || child.isAlive();
 			}
 		}
 		this.amActive = isActive;

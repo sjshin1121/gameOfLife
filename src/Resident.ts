@@ -11,7 +11,7 @@ export class Resident implements Cell{
 	private isStable(): boolean {
 		return this.amAlive === this.willBeAlive;
 	}
-	nextState(north: Cell, south, east, west, northeast, northwest, southeast, southwest): boolean {
+	nextGeneration(north: Cell, south, east, west, northeast, northwest, southeast, southwest): boolean {
 		let neighbors = 0;
 		if (north.isAlive()) ++neighbors;
 		if (south.isAlive()) ++neighbors;
@@ -41,7 +41,7 @@ export class Resident implements Cell{
 		return this.amAlive;
 	}
 
-	redraw(renderer, x, y): void {
+	draw(renderer, x, y): void {
 		this.x = x * this.DEFAULT_RESIDENT_SIZE;
 		this.y = y * this.DEFAULT_RESIDENT_SIZE;
 		renderer.addRect(
