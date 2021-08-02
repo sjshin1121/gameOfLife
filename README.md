@@ -11,4 +11,4 @@
 * composite pattern
   * 부분과 전체 계층을 표현하는 패턴
   * 부분, 전체를 인터페이스로 통일 후 부분을 전체가 포함하는 형태
-
+  * ![image](https://user-images.githubusercontent.com/2585673/127866773-05dfd786-c9c6-4249-86d8-605f45285a2a.png)
