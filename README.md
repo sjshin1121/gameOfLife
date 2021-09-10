@@ -1,4 +1,5 @@
 # game of life
+https://sjshin1121.github.io/gameOfLife/
 ## 소개
 * 삶(life)이란 세계(world)안에서 이웃(neighborhood)과 더불어 살아가는(resident) 것이다.
 * holub on patterns 를 보고 공부한 내용입니다.
